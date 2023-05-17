@@ -48,7 +48,7 @@
             </div>
             <div class="form-group">
                 <label for="nombre">Nombre:</label>
-                <input type="text" class="form-control" id="nombre" name="nombre">
+                <input type="text" class="form-control" id="nombre" name="nombre" required> 
             </div>
             <div class="form-group text-center">
                 <input type="submit" class="btn btn-primary" value="Enviar">
@@ -83,13 +83,24 @@
             let nombre = document.getElementById('nombre').value;
             let result = await getExpedientes(asunto, anio);
             nombre = nombre.toUpperCase().replace(/\s+/g, ' ');
-            // Mostrar el resultado en el alerta correspondiente
+            nombre = nombre.split(" ")
+
+            code = ``
+            for (let i = 0; i < nombre.length; i++) {
+                const e = nombre[i];
+                if ( code != "" && i != nombre.length ) {
+                    code += ` ||`    
+                } 
+                code += `r.partes.includes(`
+                code += `"${e}"` 
+                code += `)`
+            }
             
             // este ciclo permite filtar los resultados con el nombre agregado en el formulario, validar otra reglas de negocio
             rows = ``;
             total = 0         
             result.forEach( (r ) => {
-               if (r.partes.includes(nombre)) {
+               if (eval(code)) {
                     total++
                     rows += `<tr>
                                     <th scope="row">${r.anio}</th>
@@ -122,12 +133,32 @@
             
         });
 
-        // Función para validar el expediente utilizando puppeteer
+        // Función para validar los datos
         async function getExpedientes(asunto, anio) {
-            if (anio == null && asunto == null ) return null
             let res = []
+            let validAnios = (anio == null || anio == "")
+            let validAsunto = (asunto == null || asunto == "")
+            if (validAnios  && validAsunto) {
+                const anios = ["2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020"];
+                let res = [];
+
+                for (let index = 0; index < anios.length; index++) {
+                    for (let i = 1; i < 9999; i++) {
+                        let a = i.toString().padStart(4, "0");
+                        if (a.length == 4) {
+                            console.log("asunto", a)
+                            console.log("anio", anios[index])
+                            let response = await fetch(`/scrape?asunto=${a}&anio=${anios[index]}`);
+                            let data = await response.json();
+                            res = res.concat(data.resultado);
+                        }
+                    }
+                }
+
+                return res;
+            }
             
-            if (anio == null || anio == "") {
+            if (validAnios) {
                 const anios = ["2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019",  "2020"] // se puedo remplazar por un for(i= 2003; i<=2020; i++)
                 for (let index = 0; index < anios.length; index++) {
                     n = anios[index]
@@ -138,7 +169,7 @@
                 return res
             }
             
-            if (asunto == null || asunto == "") {
+            if (validAsunto) {
                 for (let i = 1; i < 9999; i++) {
                     let a = i.toString().padStart(4, "0")
                     if(a.length == 4) {
@@ -149,7 +180,6 @@
                 }
                 return res
             }
-
 
             let response = await fetch(`/scrape?asunto=${asunto}&anio=${anio}`);
             let data = await response.json();
