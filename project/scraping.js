@@ -231,7 +231,6 @@ function mapResponse(data, numeroExpediente, anio) {
     for (let  i = 0;  i < data.length;  i++) {
         let d = data[i];
         if ( d.length > 0 && d[2] != undefined) {
-            console.log("d[2]>>>>", d[2])
             if (d[2].includes(numeroExpediente + '/' + anio)) {
                 res = {
                     anio: d[0],
