@@ -153,7 +153,7 @@
 
             let response = await fetch(`/scrape?asunto=${asunto}&anio=${anio}`);
             let data = await response.json();
-            return res.push(data.resultado)
+            return res.concat(data.resultado)
         }
         
     </script>
