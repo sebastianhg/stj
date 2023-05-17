@@ -1,0 +1,161 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Formulario de Scraping</title>
+</head>
+<body>
+    <h1>Formulario de Scraping</h1>
+    <form action="/scrape" method="get">
+        <label for="asunto">Número de Expediente:</label>
+        <input type="text" id="asunto" name="asunto">
+        <br>
+        <label for="anio">Año:</label>
+        <input type="text" id="anio" name="anio">
+        <br>
+        <input type="submit" value="Enviar">
+    </form>
+    <p id="resultado"></p>
+    <script>
+        // Obtener el resultado del scraping del query string de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const resultado = urlParams.get('resultado');
+
+        // Mostrar el resultado en el elemento de la página
+        const resultadoElemento = document.getElementById('resultado');
+        resultadoElemento.textContent = resultado;
+    </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Formulario de Scraping</title>
+    <!-- Incluir los archivos CSS de Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Formulario de Validacion</h1>
+        <form action="/scrape" method="get" id="formularioScraping">
+            <div class="form-group">
+                <label for="asunto">Número de Expediente:</label>
+                <input type="text" class="form-control" id="asunto" name="asunto">
+            </div>
+            <div class="form-group">
+                <label for="anio">Año:</label>
+                <input type="text" class="form-control" id="anio" name="anio">
+            </div>
+            <div class="form-group">
+                <label for="nombre">Nombre:</label>
+                <input type="text" class="form-control" id="nombre" name="nombre">
+            </div>
+            <div class="form-group text-center">
+                <input type="submit" class="btn btn-primary" value="Enviar">
+            </div>
+
+        </form>
+        
+        <div class="text-center" id="totaldatos"></div>
+        <div class="text-center" id="resultadoAlerta" style="display:none;"></div>
+        <!-- <div class="text-center alert alert-warning" id="resultadoAlerta" style="display:none;"></div> -->        
+    </div>
+
+    <!-- Incluir los archivos JavaScript de Bootstrap y scraping.js -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Obtener el resultado del scraping del query string de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const resultado = urlParams.get('resultado');
+
+        // Mostrar el resultado en un alerta al hacer clic en Enviar
+        const formulario = document.getElementById('formularioScraping');
+        const resultadoAlerta = document.getElementById('resultadoAlerta');
+        const totalDatos = document.getElementById('totaldatos');
+        formulario.addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevenir el envío del formulario
+
+            // Validar el resultado utilizando puppeteer
+            const asunto = document.getElementById('asunto').value;
+            const anio = document.getElementById('anio').value;
+            let nombre = document.getElementById('nombre').value;
+            let result = await getExpedientes(asunto, anio);
+            nombre = nombre.toUpperCase().replace(/\s+/g, ' ');
+            // Mostrar el resultado en el alerta correspondiente
+            
+            // este ciclo permite filtar los resultados con el nombre agregado en el formulario, validar otra reglas de negocio
+            rows = ``;
+            total = 0         
+            result.forEach( (r ) => {
+               if (r.partes.includes(nombre)) {
+                    total++
+                    rows += `<tr>
+                                    <th scope="row">${r.anio}</th>
+                                    <td>${r.secretaria}</td>
+                                    <td>${r.asunto}</td>
+                                    <td>${r.partes}</td>
+                                    <td>${r.sistesisresultado}</td>
+                                </tr>`   
+                }
+            });
+            
+            tablaResultados = `
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Año</th>
+                                <th scope="col">Secretaria</th>
+                                <th scope="col">Asunto</th>
+                                <th scope="col">Partes</th>
+                                <th scope="col">Sistesis</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>`
+            resultadoAlerta.innerHTML = tablaResultados;
+            totalDatos.innerHTML = `<h6><b>Total Registros Encontrados:</b> ${total}</h6>`
+            resultadoAlerta.style.display = 'block'; // Mostrar el alerta
+            
+        });
+
+        // Función para validar el expediente utilizando puppeteer
+        async function getExpedientes(asunto, anio) {
+            if (anio == null && asunto == null ) return null
+            let res = []
+            
+            if (anio == null || anio == "") {
+                const anios = ["2017", "2017"] // se puedo remplazar por un for(i= 2003; i<=2020; i++)
+                for (let index = 0; index < anios.length; index++) {
+                    n = anios[index]
+                    let response = await fetch(`/scrape?asunto=${asunto}&anio=${n}`);
+                    let data = await response.json();
+                    res = res.concat(data.resultado)
+                }
+                return res
+            }
+            
+            if (asunto == null || asunto == "") {
+                for (let i = 1; i < 10; i++) {
+                    let a = i.toString().padStart(4, "0")
+                    if(a.length == 4) {
+                        let response = await fetch(`/scrape?asunto=${a}&anio=${anio}`);
+                        let data = await response.json();
+                        res = res.concat(data.resultado)
+                    }
+                }
+                return res
+            }
+
+
+            let response = await fetch(`/scrape?asunto=${asunto}&anio=${anio}`);
+            let data = await response.json();
+            return res.push(data.resultado)
+        }
+        
+    </script>
+</body>
+</html>
