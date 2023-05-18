@@ -82,9 +82,11 @@
             const anio = document.getElementById('anio').value;
             let nombre = document.getElementById('nombre').value;
             let result = await getExpedientes(asunto, anio);
+            //Convierte nombre en mayuscula y procesa y limpia toda la cadena y elimina espacios en blanco y caracteres especiales  
             nombre = nombre.toUpperCase().replace(/\s+/g, ' ');
+            //Divide la cadena nombre en un arreglo de substrings, utilizando el espacio como separador para ubicar en diferentes posiciones
             nombre = nombre.split(" ")
-
+            //Convertir nombre a un array que contiene una serie de condiciones
             code = ``
             for (let i = 0; i < nombre.length; i++) {
                 const e = nombre[i];
@@ -133,7 +135,7 @@
             
         });
 
-        // Función para validar los datos
+        // Función para validar los datos cumpliendo las condiciones de cada input 
         async function getExpedientes(asunto, anio) {
             let res = []
             let validAnios = (anio == null || anio == "")
