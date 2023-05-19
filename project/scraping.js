@@ -56,7 +56,6 @@ function mapResponse(data, numeroExpediente, anio,nombre,) {
             if (d[2].includes(numeroExpediente + '/' + anio)) {
                 if (eval(buildValidationName(nombre))) {
                     console.log("validacion de nombre", eval(buildValidationName(nombre)))
-                    console.log("response", res)
                     let res = {
                         anio: d[0],
                         secretaria: d[1],
