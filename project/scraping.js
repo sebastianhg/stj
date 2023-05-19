@@ -51,9 +51,13 @@ function mapResponse(data, numeroExpediente, anio,nombre,) {
     for (let  i = 0;  i < data.length;  i++) {
         let d = data[i];
         if ( d.length > 0 && d[2] != undefined && d[3] != undefined) {
+            console.log("d[2]!!", d[2])
+            console.log("d[3]!!", d[3])
             if (d[2].includes(numeroExpediente + '/' + anio)) {
                 if (eval(buildValidationName(nombre))) {
-                    res = {
+                    console.log("validacion de nombre", eval(buildValidationName(nombre)))
+                    console.log("response", res)
+                    let res = {
                         anio: d[0],
                         secretaria: d[1],
                         asunto: d[2],
@@ -82,6 +86,8 @@ function buildValidationName(nombre) {
         code += `"${e}"` 
         code += `)`
     }
+
+    console.log("code", code)
     return code
 }
 
