@@ -8,6 +8,7 @@ async function GetExpedientes(titular, numeroExpediente, anio) {
         let res = await expedientes(j, titular, numeroExpediente, anio)
         response.concat(res) 
     }
+    return response
 }
 
 async function expedientes(juzgado, titular, numeroExpediente, anio) {
