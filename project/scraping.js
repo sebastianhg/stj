@@ -70,6 +70,8 @@ function mapResponse(data, numeroExpediente, anio,nombre,) {
 
 
 function buildValidationName(nombre) {
+    nombre = nombre.toUpperCase().replace(/\s+/g, ' ');
+    nombre = nombre.split(" ")
     code = ``
     for (let i = 0; i < nombre.length; i++) {
         const e = nombre[i];
