@@ -1,43 +1,13 @@
-<!-- <!DOCTYPE html>
-<html>
-<head>
-    <title>Formulario de Scraping</title>
-</head>
-<body>
-    <h1>Formulario de Scraping</h1>
-    <form action="/scrape" method="get">
-        <label for="asunto">Número de Expediente:</label>
-        <input type="text" id="asunto" name="asunto">
-        <br>
-        <label for="anio">Año:</label>
-        <input type="text" id="anio" name="anio">
-        <br>
-        <input type="submit" value="Enviar">
-    </form>
-    <p id="resultado"></p>
-    <script>
-        // Obtener el resultado del scraping del query string de la URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const resultado = urlParams.get('resultado');
-
-        // Mostrar el resultado en el elemento de la página
-        const resultadoElemento = document.getElementById('resultado');
-        resultadoElemento.textContent = resultado;
-    </script>
-</body>
-</html> -->
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>Formulario de Scraping</title>
-    <!-- Incluir los archivos CSS de Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container mt-5">
         <h1 class="text-center">Formulario de Validacion</h1>
-        <form action="/scrape" method="get" id="formularioScraping">
+        <form action="/get-expedientes" method="ge" id="formularioScraping">
             <div class="form-group">
                 <label for="asunto">Número de Expediente:</label>
                 <input type="text" class="form-control" id="asunto" name="asunto">
@@ -53,141 +23,14 @@
             <div class="form-group text-center">
                 <input type="submit" class="btn btn-primary" value="Enviar">
             </div>
-
         </form>
         
         <div class="text-center" id="totaldatos"></div>
         <div class="text-center" id="resultadoAlerta" style="display:none;"></div>
-        <!-- <div class="text-center alert alert-warning" id="resultadoAlerta" style="display:none;"></div> -->        
     </div>
 
-    <!-- Incluir los archivos JavaScript de Bootstrap y scraping.js -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        // Obtener el resultado del scraping del query string de la URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const resultado = urlParams.get('resultado');
-
-        // Mostrar el resultado en un alerta al hacer clic en Enviar
-        const formulario = document.getElementById('formularioScraping');
-        const resultadoAlerta = document.getElementById('resultadoAlerta');
-        const totalDatos = document.getElementById('totaldatos');
-        formulario.addEventListener('submit', async function(event) {
-            event.preventDefault(); // Prevenir el envío del formulario
-
-            // Validar el resultado utilizando puppeteer
-            const asunto = document.getElementById('asunto').value;
-            const anio = document.getElementById('anio').value;
-            let nombre = document.getElementById('nombre').value;
-            let result = await getExpedientes(asunto, anio);
-            //Convierte nombre en mayuscula y procesa y limpia toda la cadena y elimina espacios en blanco y caracteres especiales  
-            nombre = nombre.toUpperCase().replace(/\s+/g, ' ');
-            //Divide la cadena nombre en un arreglo de substrings, utilizando el espacio como separador para ubicar en diferentes posiciones
-            nombre = nombre.split(" ")
-            //Convertir nombre a un array que contiene una serie de condiciones
-            code = ``
-            for (let i = 0; i < nombre.length; i++) {
-                const e = nombre[i];
-                if ( code != "" && i != nombre.length ) {
-                    code += ` ||`    
-                } 
-                code += `r.partes.includes(`
-                code += `"${e}"` 
-                code += `)`
-            }
-            
-            // este ciclo permite filtar los resultados con el nombre agregado en el formulario, validar otra reglas de negocio
-            rows = ``;
-            total = 0         
-            result.forEach( (r ) => {
-               if (eval(code)) {
-                    total++
-                    rows += `<tr>
-                                    <th scope="row">${r.anio}</th>
-                                    <td>${r.secretaria}</td>
-                                    <td>${r.asunto}</td>
-                                    <td>${r.partes}</td>
-                                    <td>${r.sistesisresultado}</td>
-                                </tr>`   
-                }
-            });
-            
-            tablaResultados = `
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Año</th>
-                                <th scope="col">Secretaria</th>
-                                <th scope="col">Asunto</th>
-                                <th scope="col">Partes</th>
-                                <th scope="col">Sistesis</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rows}
-                        </tbody>
-                    </table>`
-            resultadoAlerta.innerHTML = tablaResultados;
-            totalDatos.innerHTML = `<h6><b>Total Registros Encontrados:</b> ${total}</h6>`
-            resultadoAlerta.style.display = 'block'; // Mostrar el alerta
-            
-        });
-
-        // Función para validar los datos cumpliendo las condiciones de cada input 
-        async function getExpedientes(asunto, anio) {
-            let res = []
-            let validAnios = (anio == null || anio == "")
-            let validAsunto = (asunto == null || asunto == "")
-            if (validAnios  && validAsunto) {
-                const anios = ["2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020"];
-                let res = [];
-
-                for (let index = 0; index < anios.length; index++) {
-                    for (let i = 1; i < 9999; i++) {
-                        let a = i.toString().padStart(4, "0");
-                        if (a.length == 4) {
-                            console.log("asunto", a)
-                            console.log("anio", anios[index])
-                            let response = await fetch(`/scrape?asunto=${a}&anio=${anios[index]}`);
-                            let data = await response.json();
-                            res = res.concat(data.resultado);
-                        }
-                    }
-                }
-
-                return res;
-            }
-            
-            if (validAnios) {
-                const anios = ["2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019",  "2020"] // se puedo remplazar por un for(i= 2003; i<=2020; i++)
-                for (let index = 0; index < anios.length; index++) {
-                    n = anios[index]
-                    let response = await fetch(`/scrape?asunto=${asunto}&anio=${n}`);
-                    let data = await response.json();
-                    res = res.concat(data.resultado)
-                }
-                return res
-            }
-            
-            if (validAsunto) {
-                for (let i = 1; i < 9999; i++) {
-                    let a = i.toString().padStart(4, "0")
-                    if(a.length == 4) {
-                        let response = await fetch(`/scrape?asunto=${a}&anio=${anio}`);
-                        let data = await response.json();
-                        res = res.concat(data.resultado)
-                    }
-                }
-                return res
-            }
-
-            let response = await fetch(`/scrape?asunto=${asunto}&anio=${anio}`);
-            let data = await response.json();
-            return res.concat(data.resultado)
-        }
-        
-    </script>
 </body>
 </html>
