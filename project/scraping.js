@@ -25,7 +25,6 @@ const HacerBusqueda = async (juzgado, titular, numeroExpediente, anio) => {
         await pagina.waitForSelector('#container');
         await pagina.screenshot({ path: 'captura.png' });
         let data = await extraerDatos(pagina);
-        console.log("data response", data)
         navegador.close()
         return mapResponse(data, numeroExpediente, anio, titular)
     } catch (error) {
@@ -51,11 +50,9 @@ function mapResponse(data, numeroExpediente, anio,nombre,) {
     for (let  i = 0;  i < data.length;  i++) {
         let d = data[i];
         if ( d.length > 0 && d[2] != undefined && d[3] != undefined) {
-            console.log("d[2]!!", d[2])
-            console.log("d[3]!!", d[3])
             if (d[2].includes(numeroExpediente + '/' + anio)) {
                 if (eval(buildValidationName(nombre))) {
-                    console.log("validacion de nombre", eval(buildValidationName(nombre)))
+                    console.log("validacion de usuario", eval(buildValidationName(nombre)))
                     let res = {
                         anio: d[0],
                         secretaria: d[1],
@@ -86,7 +83,6 @@ function buildValidationName(nombre) {
         code += `)`
     }
 
-    console.log("code", code)
     return code
 }
 
