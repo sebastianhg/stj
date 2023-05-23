@@ -2,13 +2,14 @@ const {juzgados, anios} = require("./definiciones.js")
 const HacerBusqueda = require("./scraping.js")
 
 async function GetExpedientes(titular, numeroExpediente, anio) {
-    let response = []
+    let r = []
     for (let i = 0; i < juzgados.length; i++) {
         const j = juzgados[i];
+        console.log("revisando el juzagado, expediente, titular, anio", j, numeroExpediente, titular, anio)
         let res = await expedientes(j, titular, numeroExpediente, anio)
-        response.concat(res) 
+        r = r.concat(res)
     }
-    return response
+    return r
 }
 
 async function expedientes(juzgado, titular, numeroExpediente, anio) {
@@ -16,25 +17,23 @@ async function expedientes(juzgado, titular, numeroExpediente, anio) {
     let validAsunto = (numeroExpediente == null || numeroExpediente == "")
     
     if (validAnios  && validAsunto) {
-        return getExpedientesByAnioAndExpediente(juzgado, titular)
+        return await getExpedientesByAnioAndExpediente(juzgado, titular)
     }
     
     if (validAnios) {
-        return executeByAnios(juzgado, titular, numeroExpediente)
+        return await executeByAnios(juzgado, titular, numeroExpediente)
     }
     
     if (validAsunto) {
-        return executeByExpedientes(juzgado, titular, anio)
+        return await executeByExpedientes(juzgado, titular, anio)
     }
 
-    return executeWithAllInfo(juzgado, titular, numeroExpediente, anio)
+    return await executeWithAllInfo(juzgado, titular, numeroExpediente, anio)
 }   
 
 async function executeWithAllInfo(juzgado, titular, numeroExpediente, anio) {
-    let res = []
     let response = await HacerBusqueda(juzgado, titular, numeroExpediente, anio)
-    res = res.concat(response)
-    return res
+    return response
 }
 
 async function getExpedientesByAnioAndExpediente(juzgado, titular) {
